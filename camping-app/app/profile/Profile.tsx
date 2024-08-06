@@ -13,6 +13,7 @@ import { DrawerActions } from "@react-navigation/drawer";
 
 const { width } = Dimensions.get("window");
 
+
 const Profile = () => {
     const navigation = useNavigation();
     const router = useRouter();
@@ -151,7 +152,7 @@ const Profile = () => {
                     <TouchableOpacity style={[styles.actionButton, styles.addCampButton]}>
                         <Text style={styles.buttonText}>Add Camp</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.actionButton, styles.addExperienceButton]}>
+                    <TouchableOpacity  onPress={()=>router.replace('')} style={[styles.actionButton, styles.addExperienceButton]}>
                         <Text style={styles.buttonText}>Add Experience</Text>
                     </TouchableOpacity>
                 </View>

@@ -10,7 +10,9 @@ const { width, height } = Dimensions.get('window');
 
 const categories = ['Kayaking', 'Climbing', 'Fishing', 'Hiking', 'Hitchhiking'];
 
+
 interface User {
+
   id: string;
   name: string;
   email: string;
@@ -105,6 +107,7 @@ const Home = () => {
           // Fetch camps data
           const campsResponse = await axios.get('http://192.168.10.6:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
+          console.log(campsResponse.data.data)
           setFilteredCamps(campsResponse.data.data);
         } else {
           console.error('Token not found in AsyncStorage');
