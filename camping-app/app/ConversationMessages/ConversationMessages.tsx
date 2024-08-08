@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { useChat } from '../../ChatContext/ChatContext';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage for local storage
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const ConversationMessages = () => {
   const route = useRoute();
   const { conversationId } = route.params;
   const [message, setMessage] = useState('');
-  const [user, setUser] = useState<any>(null); // Adjust the type as needed
+  const [user, setUser] = useState<any>(null); 
   const { messages, sendMessage, setConversationId } = useChat();
-  const flatListRef = useRef<FlatList>(null); // Create a ref for the FlatList
+  const flatListRef = useRef<FlatList>(null); 
 
-  const [initialScrollIndex, setInitialScrollIndex] = useState<number | null>(null); // Store initial scroll index for first render
+  const [initialScrollIndex, setInitialScrollIndex] = useState<number | null>(null); 
 
   useEffect(() => {
     setConversationId(conversationId);
@@ -78,6 +79,15 @@ const ConversationMessages = () => {
         >
           {item.content}
         </Text>
+        {isSentByUser ? (
+          <View style={styles.sentTailContainer}>
+            <View style={styles.sentTail} />
+          </View>
+        ) : (
+          <View style={styles.receivedTailContainer}>
+            <View style={styles.receivedTail} />
+          </View>
+        )}
       </View>
     );
   };
@@ -100,10 +110,11 @@ const ConversationMessages = () => {
           style={styles.input}
           value={message}
           onChangeText={setMessage}
-          placeholder="Type your message"   
-
+          placeholder="Type your message"
         />
-        <Button title="Send" onPress={handleSend} />
+        <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
+          <Icon name="send" size={26} color="#007bff" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -113,13 +124,36 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#00595E',
+  },
+  sentTailContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: -10,
+  },
+  sentTail: {
+    width: 20,
+    height: 20,
+    backgroundColor: '#007bff',
+    transform: [{ rotate: '45deg' }],
+  },
+  receivedTailContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: -10,
+  },
+  receivedTail: {
+    width: 20,
+    height: 20,
+    backgroundColor: '#e1e1e1',
+    transform: [{ rotate: '45deg' }],
   },
   messageContainer: {
     marginVertical: 5,
     maxWidth: '80%',
     padding: 10,
     borderRadius: 10,
+    position: 'relative', 
   },
   sentMessageContainer: {
     alignSelf: 'flex-end',
@@ -148,9 +182,15 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 10,
     padding: 10,
     backgroundColor: '#fff',
+  },
+  sendButton: {
+    marginLeft: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
   },
 });
 

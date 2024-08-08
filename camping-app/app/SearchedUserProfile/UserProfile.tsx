@@ -113,7 +113,7 @@ const UserProfile = () => {
     const fetchUser = async () => {
       try {
 
-        const response = await axios.get(`http://192.168.10.4:5000/api/users/${userId}`);
+        const response = await axios.get(`http://192.168.1.20:5000/api/users/${userId}`);
         setUser(response.data);
 
       } catch (error) {
