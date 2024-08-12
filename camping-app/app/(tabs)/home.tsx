@@ -106,7 +106,7 @@ const Home = () => {
         }
 
         // Fetch camps data
-        const campsResponse = await axios.get('http://192.168.1.20:5000/api/camps/getAll');
+        const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
         setCamps(campsResponse.data.data);
         setFilteredCamps(campsResponse.data.data);
       } catch (error) {

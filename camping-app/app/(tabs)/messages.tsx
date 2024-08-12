@@ -18,7 +18,7 @@ const Messages = () => {
     const fetchConversations = async () => {
       try {
         const token = await AsyncStorage.getItem('token'); 
-        const response = await axios.get('http://192.168.1.20:5000/api/chat/conversations', {
+        const response = await axios.get('http://192.168.10.4:5000/api/chat/conversations', {
           headers: {
             Authorization: token, 
           },
@@ -44,7 +44,6 @@ const Messages = () => {
 
   const handleSearchChange = (text) => {
     setSearchQuery(text);
-    // You might want to filter conversations based on searchQuery here
   };
 
   return (
