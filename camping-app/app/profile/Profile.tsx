@@ -31,9 +31,9 @@ const Profile = () => {
                     id: response.data.user.id,
                     name: response.data.user.name,
                     email: response.data.user.email,
-                    age: response.data.user.age,
+                    dateOfBirth: response.data.user.dateOfBirth,
                     imagesProfile: response.data.user.imagesProfile,
-                    location: response.data.user.location,
+                    address: response.data.user.address,
                     bio: response.data.user.bio,
                     friendsCount: response.data.user.friendsCount,
                     joinedUsers: response.data.posts,
@@ -62,13 +62,14 @@ const Profile = () => {
                         if (decodedToken && decodedToken.id) {
                             // Fetch user data based on ID from decoded token
                             const response = await axios.get(`http://192.168.10.6:5000/api/users/${decodedToken.id}`);
+                            // console.log(response,'tttttttttttttttttttttttttttt');
                             setUser(response.data);
                             setUserData({
                                 id: response.data.id,
                                 name: response.data.name,
                                 email: response.data.email,
-                                age: response.data.age,
-                                location: response.data.location,
+                                dateOfBirth: response.data.dateOfBirth,
+                                address: response.data.address,
                                 bio: response.data.bio,
                                 friendsCount: response.data.friendsCount,
                                 interests: response.data.interests,
@@ -126,20 +127,20 @@ const Profile = () => {
                     source={{ uri: 'https://images5.alphacoders.com/112/1129765.jpg' }}
                     style={styles.headerBackground}
                 />
-                <Image source={{ uri: userData?.imagesProfile?.[0] || profileImage }} style={styles.headerProfileImage} />
+                <Image source={{ uri: userData?.imagesProfile || profileImage }} style={styles.headerProfileImage} />
             </View>
             <View style={styles.profileSection}>
                 <Text style={styles.profileName}>{userData?.name || "User Name"}</Text>
                 <View style={styles.profileInfo}>
                     <FontAwesome name="birthday-cake" size={20} color="#fff" />
                     <Text style={styles.profileAge}>
-                        {userData?.age || "N/A"} years old
+                        {userData?.dateOfBirth.split('T')[0] || "N/A"}
                     </Text>
                 </View>
                 <View style={styles.profileInfo}>
                     <MaterialCommunityIcons name="map-marker" size={20} color="#fff" />
                     <Text style={styles.profileLocation}>
-                        {userData?.location || "N/A"}
+                        {userData?.address || "N/A"}
                     </Text>
                 </View>
                 <View style={styles.profileInfo}>

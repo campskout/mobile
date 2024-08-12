@@ -19,7 +19,7 @@ interface Camp {
   user: {
     id: string;
     name: string;
-    imagesProfile: string[];
+    imagesProfile: string;
   };
 }
 
@@ -130,7 +130,7 @@ const MyCamps = () => {
                 </Text>
                 {camp.user && (
                   <View style={styles.hostInfo}>
-                    <Image source={{ uri: camp.user.imagesProfile[0] || 'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
+                    <Image source={{ uri: camp.user.imagesProfile || 'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
                     <Text style={styles.hostName}>{camp.user.name}</Text>
                   </View>
                 )}
