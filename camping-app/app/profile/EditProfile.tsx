@@ -115,7 +115,6 @@ console.log(interests,'interest');
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log(response,'rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr');
       
       if (response.data.success) {
         alert('Profile updated successfully!');
@@ -325,7 +324,7 @@ export default EditProfile;
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#00595E',
+    backgroundColor: '#00595E', 
     padding: 20,
   },
   header: {

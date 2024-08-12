@@ -9,7 +9,7 @@ import axios from "axios";
 import SharedExp from "../../components/SharedExp";
 import profileImage from "../../assets/images/default-avatar.webp"; // Default profile image
 import { useNavigation } from '@react-navigation/native';
-import { DrawerActions } from "@react-navigation/drawer";
+
 
 const { width } = Dimensions.get("window");
 
@@ -153,7 +153,7 @@ const Profile = () => {
                     <TouchableOpacity style={[styles.actionButton, styles.addCampButton]}>
                         <Text style={styles.buttonText}>Add Camp</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity  onPress={()=>router.replace('')} style={[styles.actionButton, styles.addExperienceButton]}>
+                    <TouchableOpacity  onPress={()=>router.replace('createExp/CreateExp')} style={[styles.actionButton, styles.addExperienceButton]}>
                         <Text style={styles.buttonText}>Add Experience</Text>
                     </TouchableOpacity>
                 </View>

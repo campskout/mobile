@@ -1,16 +1,17 @@
-import { StyleSheet, Text, View, TextInput, Button, Alert, ActivityIndicator, FlatList, Image, Modal, Pressable } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Alert, ActivityIndicator, FlatList, Image, Modal, Pressable, ScrollView } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import JWT from 'expo-jwt';
-import { AirbnbRating, Rating } from 'react-native-ratings';  // Import the Rating component
+import { AirbnbRating, Rating } from 'react-native-ratings';
 
 const RatingAndReviews = () => {
   const [userData, setUserData] = useState<any>(null);
   const [postId, setPostId] = useState('');
   const [userId, setUserId] = useState('');
-  const [rating, setRating] = useState<number>(0);  // Changed to number
+  const [rating, setRating] = useState<number>(0);
   const [reviews, setReviews] = useState('');
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isUserAccepted, setIsUserAccepted] = useState<boolean>(false);
@@ -48,11 +49,6 @@ const RatingAndReviews = () => {
 
   // Handle update review
   const handleUpdateReview = async () => {
-    if (!isUserAccepted) {
-      Alert.alert('Error', 'You are not accepted to join this trip, so you cannot review or rate it.');
-      return;
-    }
-
     try {
       const response = await fetch('http://192.168.10.6:5000/api/camps/updateReview', {
         method: 'POST',
@@ -60,7 +56,7 @@ const RatingAndReviews = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          postId: Number(postId),
+          postId: Number(selectedPostId),
           userId: Number(userId),
           rating,
           reviews,
@@ -71,16 +67,18 @@ const RatingAndReviews = () => {
 
       if (response.ok) {
         Alert.alert('Success', data.msg);
-        // Refresh data after update
-        fetchUserData(userId);
+        fetchUserData(userId); // Refresh data after update
       } else {
-        Alert.alert('Error', data.message);
+        Alert.alert('Error', data.message || 'Failed to update review');
       }
     } catch (error) {
       console.error('Error:', error);
       Alert.alert('Error', 'An unexpected error occurred.');
     }
   };
+
+
+
 
   useEffect(() => {
     const decodeToken = async () => {
@@ -108,49 +106,64 @@ const RatingAndReviews = () => {
     };
 
     decodeToken();
-  }, [postId]);
+  }, []); // Empty dependency array ensures this runs only on mount
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return <ActivityIndicator size="large" color="#B3492D" />;
   }
 
-  const renderJoinedPost = ({ item }: { item: any }) => (
-    <View style={styles.postItem}>
-      {item.post && item.post.images && item.post.images.length > 0 && (
-        <Image
-          source={{ uri: item.post.images[0] }}
-          style={styles.postImage}
-          resizeMode="cover"
-        />
-      )}
-      <Text style={styles.postTitle}>Title: {item.post.title}</Text>
-      <Text>Status: {item.status}</Text>
-      <Text>Description: {item.post.description}</Text>
-      <Text>Category: {item.post.category}</Text>
-      <View style={styles.ratingContainer}>
-        <Text>Rating:</Text>
-        <Rating
-          type='star'
-          ratingCount={5}
-          imageSize={20}
-          readonly
-          startingValue={item.rating}  // Display the rating
-        />
-      </View>
-      <Text>Review: {item.reviews}</Text>
-    </View>
-  );
+  const renderJoinedPost = ({ item }: { item: any }) => {
+    const isPostCompleted = item.post.status === 'Completed';
 
-  const openModal = () => {
-    if (!isUserAccepted) {
-      Alert.alert('Error', 'You are not accepted to join this trip, so you cannot update your review.');
-      return;
-    }
-    setModalVisible(true);
+    return (
+      <View style={styles.postItem}>
+        {item.post && item.post.images && item.post.images.length > 0 && (
+          <Image
+            source={{ uri: item.post.images[0] }}
+            style={styles.postImage}
+            resizeMode="cover"
+          />
+        )}
+        <View style={styles.postDetails}>
+          <Text style={styles.postTitle}>{item.post.title}</Text>
+          <Text style={styles.text}>Status: {item.status}</Text>
+          <Text style={styles.text}>Description: {item.post.description}</Text>
+          <Text style={styles.text}>Category: {item.post.category}</Text>
+          <Text style={styles.text}>StatusPost: Completed</Text>
+          <View style={styles.ratingContainer}>
+            <Text style={styles.text}>Rating:</Text>
+            <View style={styles.ratingWrapper}>
+              <Rating
+                type='star'
+                ratingCount={5}
+                imageSize={24}
+                readonly
+                startingValue={item.rating}
+              />
+            </View>
+          </View>
+          <Text style={styles.text}>Review: {item.reviews}</Text>
+          {isPostCompleted && (
+            <Pressable
+              style={styles.updateButton}
+              onPress={() => {
+                setSelectedPostId(item.postId.toString());
+                setRating(item.rating || 0);
+                setReviews(item.reviews || '');
+                setModalVisible(true);
+              }}
+            >
+              <Text style={styles.buttonText}>Update Review</Text>
+            </Pressable>
+          )}
+        </View>
+      </View>
+    );
   };
 
   const closeModal = () => {
     setModalVisible(false);
+    setSelectedPostId(null);
   };
 
   const submitReview = () => {
@@ -160,47 +173,54 @@ const RatingAndReviews = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Posts Joined</Text>
-      <FlatList
-        data={postsJoined}
-        renderItem={renderJoinedPost}
-        keyExtractor={(item) => item.postId.toString()}
-      />
-      <Button title="Update Review" onPress={openModal} />
-      {error && <Text style={styles.error}>{error}</Text>}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.sectionTitle}>Posts Joined by User</Text>
+        <FlatList
+          data={postsJoined}
+          renderItem={renderJoinedPost}
+          keyExtractor={(item) => item.postId.toString()}
+        />
+        {error && <Text style={styles.error}>{error}</Text>}
+      </ScrollView>
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={closeModal}
       >
-        <View style={styles.modalView}>
-          <Text>Rating:</Text>
-          <AirbnbRating
-            count={5}
-            defaultRating={rating}
-            size={20}
-            onFinishRating={setRating}  // Update rating when user selects
-          />
-          <Text>Reviews:</Text>
-          <TextInput
-            style={styles.input}
-            value={reviews}
-            onChangeText={setReviews}
-            multiline
-          />
-          <Pressable
-            style={[styles.button, styles.buttonClose]}
-            onPress={submitReview}
-          >
-            <Text style={styles.textStyle}>Submit Review</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.button, styles.buttonClose]}
-            onPress={closeModal}
-          >
-            <Text style={styles.textStyle}>Close</Text>
-          </Pressable>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Rate your experience:</Text>
+            <AirbnbRating
+              count={5}
+              defaultRating={rating}
+              size={30}
+              onFinishRating={setRating}
+              selectedColor="#B3492D"
+              showRating={false}
+            />
+            <Text style={styles.modalText}>Write your review:</Text>
+            <TextInput
+              style={styles.input}
+              value={reviews}
+              onChangeText={setReviews}
+              multiline
+              placeholder="Enter your review here..."
+              placeholderTextColor="#014043"
+            />
+            <Pressable
+              style={[styles.button, styles.buttonSubmit]}
+              onPress={submitReview}
+            >
+              <Text style={styles.buttonText}>Submit Review</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={closeModal}
+            >
+              <Text style={styles.buttonText}>Close</Text>
+            </Pressable>
+          </View>
         </View>
       </Modal>
     </View>
@@ -209,70 +229,117 @@ const RatingAndReviews = () => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    backgroundColor: '#00595E',
+  },
+  scrollContainer: {
+    flexGrow: 1,
     padding: 20,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#014043',
     padding: 10,
     marginVertical: 10,
+    width: '100%',
+    borderRadius: 5,
+    backgroundColor: '#F1FADA',
+    textAlignVertical: 'top',
+    fontSize: 16,
+    color: '#014043',
   },
   error: {
-    color: 'red',
+    color: '#B3492D',
     marginTop: 10,
+    textAlign: 'center',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     marginVertical: 10,
-  },
-  postItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  postTitle: {
+    color: '#F1FADA',
     fontWeight: 'bold',
   },
+  postItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#B3492D',
+    backgroundColor: '#014043',
+    borderRadius: 10,
+    marginBottom: 15,
+    elevation: 3,
+  },
+  postDetails: {
+    marginTop: 10,
+  },
+  postTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#F1FADA',
+  },
   postImage: {
-    width: 100,
-    height: 100,
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 10,
   },
+  ratingWrapper: {
+    marginLeft: 5,
+    backgroundColor: 'transparent',
+  },
+  text: {
+    color: '#F1FADA',
+    marginBottom: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#F1FADA',
     borderRadius: 10,
-    padding: 35,
+    padding: 25,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 10,
   },
   button: {
-    borderRadius: 20,
+    borderRadius: 5,
     padding: 10,
     elevation: 2,
-    backgroundColor: '#00796b',
+    width: '100%',
+    alignItems: 'center',
   },
-  buttonClose: {
-    backgroundColor: '#2196F3',
+  buttonSubmit: {
+    backgroundColor: '#B3492D',
     marginVertical: 10,
   },
-  textStyle: {
-    color: 'white',
+  buttonClose: {
+    backgroundColor: '#00595E',
+  },
+  buttonText: {
+    color: '#F1FADA',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: '#00595E',
   },
 });
 
 export default RatingAndReviews;
-
