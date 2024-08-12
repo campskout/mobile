@@ -44,7 +44,6 @@ const Messages = () => {
 
   const handleSearchChange = (text) => {
     setSearchQuery(text);
-    // You might want to filter conversations based on searchQuery here
   };
 
   return (
