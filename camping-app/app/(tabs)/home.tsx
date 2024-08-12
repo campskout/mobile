@@ -10,18 +10,21 @@ const { width, height } = Dimensions.get('window');
 
 const categories = ['Kayaking', 'Climbing', 'Fishing', 'Hiking', 'Hitchhiking'];
 
+
+
 interface User {
+
   id: string;
   name: string;
   email: string;
   role: string;
-  imagesProfile?: string[]; // Optional, used for campmates
+  // imagesProfile: string; 
 }
 
 const Home = () => {
   const router = useRouter();
   const profileImage = require('../../assets/images/default-avatar.webp');
-  const [user, setUser] = useState<User>({ id: "", name: "", email: "", role: "", imagesProfile: [] });
+  const [user, setUser] = useState<User>({ id: "", name: "", email: "", role: ""});
   const [camps, setCamps] = useState<any[]>([]);
   const [filteredCamps, setFilteredCamps] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -29,7 +32,9 @@ const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [likedCamps, setLikedCamps] = useState<Set<number>>(new Set());
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
-  const menuAnimation = useState(new Animated.Value(-width))[0]; // Start off-screen
+  const menuAnimation = useState(new Animated.Value(-width))[0]; 
+  const [imgPro,setImagePro]=useState<string>('')
+
 
   const handleHeartPress = (campId: number) => {
     setLikedCamps(prevLikedCamps => {
@@ -79,31 +84,35 @@ const Home = () => {
     const fetchUserAndCamps = async () => {
       try {
         const tokenData = await AsyncStorage.getItem('token');
-        console.log("token:", tokenData);
+        // console.log("token:", tokenData);
 
         if (tokenData) {
           const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
-          const key = 'mySuperSecretPrivateKey'; // Ensure this matches the encoding key
+          const key = 'mySuperSecretPrivateKey'; 
 
           try {
             const decodedToken = JWT.decode(token, key);
+            
             if (decodedToken) {
               setUser({
                 id: decodedToken.id || '',
                 name: decodedToken.name || '',
                 email: decodedToken.email || '',
-                imagesProfile: decodedToken.imagesProfile,
+                // imagesProfile: decodedToken.imagesProfile,
                 role: decodedToken.role || '',
               });
+              // console.log(decodedToken.imagesProfile,'TOKEN');
+              getOneUser(user.id)
             } else {
               console.error('Failed to decode token');
             }
           } catch (decodeError) {
             console.error('Error decoding token:', decodeError);
           }
+          // console.log(campsResponse.data.data)
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.1.106:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.6:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {
@@ -118,14 +127,31 @@ const Home = () => {
       }
     };
 
+
+
     fetchUserAndCamps();
   }, []); // Empty dependency array to run only once
 
 
   // console.log('User:', user);
+  // console.log(response.data,'userr');
   // console.log('Camps:', camps);
 
- 
+  const getOneUser = async (id:string) => {
+    // const id = user.id;
+    try {
+      const response = await axios.get(`http://192.168.10.6:5000/api/users/${id}`);
+      const oneUser = response.data;
+      console.log(oneUser,'oneuser home');
+      
+      setImagePro(oneUser.user.imagesProfile); // assuming the image URL is stored under the 'image' key
+    } catch (error) {
+      console.error('getOne home',error.message);
+    }
+  };
+
+
+
 
   if (loading) {
     return <Text style={styles.loadingText}>Loading...</Text>;
@@ -134,6 +160,7 @@ const Home = () => {
   if (error) {
     return <Text style={styles.errorText}>Error: {error}</Text>;
   }
+  
 
   return (
     <View style={styles.container}>
@@ -154,13 +181,14 @@ const Home = () => {
         </View>
         <View style={styles.actionSection}>
           <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
-            <Image source={{ uri: user.imagesProfile?.[0] || 'https://via.placeholder.com/50' }} style={styles.profileImage} />
+            <Image source={{ uri: imgPro || 'https://via.placeholder.com/50' }} style={styles.profileImage} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]}>
+          <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]} onPress={() => router.replace('creatCamp/CreateCamPost')}>
             <Text style={styles.actionButtonText}>Add a Camp</Text>
+            
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]}>
+          <TouchableOpacity style={[styles.actionButton, styles.experiencesButton]} onPress={() => router.replace('experience/experience')}>
             <Text style={styles.actionButtonText}>Experiences</Text>
           </TouchableOpacity>
         </View>
@@ -201,7 +229,7 @@ const Home = () => {
                   </Text>
                   {camp.user && (
                     <View style={styles.hostInfo}>
-                      <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} />
+                      <Image source={{ uri: imgPro ||  'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
                       <Text style={styles.hostName}>{camp.user.name}</Text>
                     </View>
                   )}
