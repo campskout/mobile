@@ -79,7 +79,7 @@ const EditProfile = () => {
               value={value}
               onChangeText={setter}
               placeholder={placeholder}
-              placeholderTextColor="white" // Set placeholder text color here
+              placeholderTextColor="white" 
               keyboardType={keyboardType}
               multiline={multiline}
               numberOfLines={numberOfLines}
@@ -99,7 +99,7 @@ export default EditProfile;
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#00595E', // Updated background color
+    backgroundColor: '#00595E', 
     padding: 20,
   },
   header: {
