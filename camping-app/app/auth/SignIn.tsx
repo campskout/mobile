@@ -41,9 +41,7 @@ const LoginScreen = () => {
 
      
 
-
-      const res = await fetch('http://192.168.10.4:5000/api/users/login', {
-
+      const res = await fetch('http://192.168.10.6:5000/api/users/login', {
 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,7 +61,8 @@ console.log(data);
 
 
       const key = 'mySuperSecretPrivateKey';
-
+      // const decodedToken = JWT.decode(token, key);
+      // console.log('Decoded Token:', decodedToken);
 
       console.log('Login successful!', data);
       router.replace('home');

@@ -19,6 +19,7 @@ import profileImage from "../../assets/images/default-avatar.webp";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import JWT from "expo-jwt";
 import { Ionicons, FontAwesome, AntDesign } from "@expo/vector-icons";
+
 // User Interface
 interface User {
   id: number;
@@ -134,6 +135,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+
         const response = await axios.get(
           `http://192.168.10.4:5000/api/users/${userId}`
         );

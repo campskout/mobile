@@ -19,7 +19,7 @@ interface Camp {
   user: {
     id: string;
     name: string;
-    imagesProfile: string[];
+    imagesProfile: string;
   };
 }
 
@@ -68,9 +68,7 @@ const MyCamps = () => {
       if (!userId) return;
 
       try {
-
-        const response = await axios.get(`http://192.168.10.4:5000/api/camps/user/${userId}/campings`);
-
+        const response = await axios.get(`http://192.168.10.6:5000/api/camps/user/${userId}/campings`);
         const campsData = response.data.data;
 
         // Ensure unique IDs
@@ -132,7 +130,7 @@ const MyCamps = () => {
                 </Text>
                 {camp.user && (
                   <View style={styles.hostInfo}>
-                    <Image source={{ uri: camp.user.imagesProfile[0] || 'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
+                    <Image source={{ uri: camp.user.imagesProfile || 'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
                     <Text style={styles.hostName}>{camp.user.name}</Text>
                   </View>
                 )}
