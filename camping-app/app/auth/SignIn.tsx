@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-// import JWT from 'expo-jwt';
+import JWT from 'expo-jwt';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
 
@@ -10,7 +10,7 @@ interface User {
   password: string;
 }
 
-const SignIn = () => {
+const LoginScreen = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -142,6 +142,7 @@ console.log(data);
 };
 
 
+export default LoginScreen;
 
 
 
@@ -262,7 +263,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10,
   },
-  
-});
 
-export default SignIn;
+});

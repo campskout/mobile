@@ -54,7 +54,7 @@ console.log("invitations " ,invitations)
     const fetchInvitations = async () => {
       if (user) {
         try {
-          const response = await axios.get(`http://192.168.10.6:5000/api/invitations/received/${user.id}`);
+          const response = await axios.get(`http://192.168.10.13:5000/api/invitations/received/${user.id}`);
           setInvitations(response.data);
         } catch (error) {
           console.error('Error fetching invitations:', error);

@@ -135,8 +135,13 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`http://192.168.10.6:5000/api/users/${userId}`);
-        setUser(response.data);
+
+        const response = await axios.get(
+          `http://192.168.10.13:5000/api/users/${userId}`
+        );
+        setUser(response.data.user);
+        setExperiences(response.data.user.experiences);
+
       } catch (error) {
         setError("Error fetching user data");
         console.error("Error fetching user:", error);

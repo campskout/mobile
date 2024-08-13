@@ -25,7 +25,7 @@ const EditProfile = () => {
   const [defaultImg,setDefaultimg]=useState('')
   const [modalVisible, setModalVisible] = useState(false);
   const activities = ['Hitchhiking', 'Kayaking', 'Climbing', 'Hiking', 'Fishing'];
-console.log(interests,'interest');
+// console.log(interests,'interest');
 
   const toggleModal = () => {
     setModalVisible(!modalVisible);
@@ -115,6 +115,7 @@ console.log(interests,'interest');
           'Content-Type': 'multipart/form-data',
         },
       });
+      console.log(response,'rrrrrrrrrrrrrrrrrrrrrrrrrr');
       
       if (response.data.success) {
         alert('Profile updated successfully!');
@@ -242,7 +243,7 @@ console.log(interests,'interest');
               value={value}
               onChangeText={setter}
               placeholder={placeholder}
-              placeholderTextColor="white"
+              placeholderTextColor="white" 
               keyboardType={keyboardType}
               multiline={multiline}
               numberOfLines={numberOfLines}
