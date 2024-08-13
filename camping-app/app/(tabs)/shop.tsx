@@ -1,20 +1,41 @@
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Modal, Pressable, TextInput, Dimensions } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Modal, Pressable, TextInput, Dimensions, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
 const Shop = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleAddToCart = (productName) => {
-    // Handle the add to cart functionality here
-    console.log(`${productName} added to cart!`);
-  };
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://192.168.10.4:5000/api/product/getAll'); 
+        const result = await response.json();
+
+        if (Array.isArray(result.data)) {
+          setProducts(result.data);
+          console.log(result.data)
+        } else {
+          console.error('Expected an array but got:', result.data);
+        }
+
+        setLoading(false);
+      } catch (err) {
+        setError(err);
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleSearchIconPress = () => {
-    // Handle search functionality here
     console.log(`Search for: ${searchQuery}`);
   };
 
@@ -23,22 +44,33 @@ const Shop = () => {
   };
 
   const handleCategorySelect = (category) => {
-    // Handle category selection here
     console.log(`${category} selected`);
     setModalVisible(false);
   };
 
-  const handleCartIconPress = () => {
-    // Handle cart icon press event here
-    console.log('Cart icon pressed!');
+  const handleMoreDetailsPress = (productId) => {
+    router.push(`/ProductDetails/ProductDetails?id=${productId}`);
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#00796B" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error loading products: {error.message}</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleCartIconPress} style={styles.cartIconContainer}>
-          <Icon name="shopping-cart" size={30} color="#fff" />
-        </TouchableOpacity>
         <Text style={styles.title}>MarketPlace</Text>
       </View>
       <View style={styles.search}>
@@ -55,32 +87,32 @@ const Shop = () => {
       </View>
       <TouchableOpacity style={styles.filter} onPress={handleFilterPress}>
         <Text style={styles.filterText}>Filter By Category</Text>
-        <Text style={styles.filterIcon}>🔻</Text>
+        <Icon name="filter-list" size={24} color="#00796B" />
       </TouchableOpacity>
       <View style={styles.products}>
-        {/* Products List */}
-        {productData.map(product => (
-          <View key={product.name} style={styles.product}>
-            <Image
-              source={{ uri: product.image }}
-              style={styles.productImage}
-            />
-            <Text style={styles.productName}>{product.name}</Text>
-            <Text style={styles.productPrice}>{product.price}</Text>
-            <Text style={styles.productCategory}>{product.category}</Text>
-            <View style={styles.productRating}>
-              {[...Array(product.rating)].map((_, i) => (
-                <Text key={i} style={styles.productStar}>★</Text>
-              ))}
+        {products
+          .filter(product => 
+            product.title && product.title.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+          .map(product => (
+            <View key={product.id} style={styles.product}>
+              <Image
+                source={{ uri: product.imageUrl[0] }}
+                style={styles.productImage}
+                
+              />
+              <Text style={styles.productName}>{product.title || 'Untitled'}</Text>
+              <Text style={styles.productPrice}>{product.price ? `${product.price} TND` : 'Price Unavailable'}</Text>
+              <Text style={styles.productCategory}>{product.category || 'Unknown Category'}</Text>
+              <TouchableOpacity 
+                style={styles.productButton} 
+                onPress={() => handleMoreDetailsPress(product.id)}
+              >
+                <Text style={styles.productButtonText}>More Details</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity 
-              style={styles.productButton} 
-              onPress={() => handleAddToCart(product.name)}
-            >
-              <Text style={styles.productButtonText}>Add To Cart</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+          ))
+        }
       </View>
 
       {/* Dropdown Modal */}
@@ -113,78 +145,25 @@ const Shop = () => {
     </ScrollView>
   );
 };
+
 const categories = [
-  'BackPacks and Bugs',
-  'Tents & Shelters',
-  'Sleeping Bags & Pads',
-  'Lighting & Lanterns',
-  'Camping Fourniture',
-  'OutDoor Cooking',
+  'hikingEquipment',
+  'clothing',
+  'cookingSupplies',
+  'safetyItems',
+  'personalCareEssentials',
 ];
-
-const productData = [
-  {
-    name: 'BackPack',
-    image: 'https://img-4.linternaute.com/Mmw9whVmuWQCLoE5bIACsXOtyDA=/1500x/smart/4c1d49ebf5af44248057966a795d5a01/ccmcms-linternaute/10783160.jpg',
-    price: '60.00 TND',
-    category: 'BackPacks and Bugs',
-    rating: 2,
-  },
-  {
-    name: 'Water Proof Tent',
-    image: 'https://img-4.linternaute.com/Mmw9whVmuWQCLoE5bIACsXOtyDA=/1500x/smart/4c1d49ebf5af44248057966a795d5a01/ccmcms-linternaute/10783160.jpg',
-    price: '350.00 TND',
-    category: 'Tents & Shelters',
-    rating: 5,
-  },
-  {
-    name: 'Sleeping Bag',
-    image: 'https://img-4.linternaute.com/Mmw9whVmuWQCLoE5bIACsXOtyDA=/1500x/smart/4c1d49ebf5af44248057966a795d5a01/ccmcms-linternaute/10783160.jpg',
-    price: '120.00 TND',
-    category: 'Sleeping Bags & Pads',
-    rating: 5,
-  },
-  {
-    name: 'HeadLamp',
-    image: 'https://img-4.linternaute.com/Mmw9whVmuWQCLoE5bIACsXOtyDA=/1500x/smart/4c1d49ebf5af44248057966a795d5a01/ccmcms-linternaute/10783160.jpg',
-    price: '50.00 TND',
-    category: 'Lighting & Lanterns',
-    rating: 5,
-  },
-  {
-    name: 'Folding Camping Table',
-    image: 'https://img-4.linternaute.com/Mmw9whVmuWQCLoE5bIACsXOtyDA=/1500x/smart/4c1d49ebf5af44248057966a795d5a01/ccmcms-linternaute/10783160.jpg',
-    price: '80.00 TND',
-    category: 'Camping Fourniture',
-    rating: 5,
-  },
-  {
-    name: 'Camping Stove',
-    image: 'https://img-4.linternaute.com/Mmw9whVmuWQCLoE5bIACsXOtyDA=/1500x/smart/4c1d49ebf5af44248057966a795d5a01/ccmcms-linternaute/10783160.jpg',
-    price: '250.00 TND',
-    category: 'OutDoor Cooking',
-    rating: 5,
-  },
-];
-
-export default Shop;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#00595E', 
+    backgroundColor: '#00595E',
     padding: 20,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
-  },
-  cartIconContainer: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    zIndex: 1,
   },
   title: {
     fontSize: 32,
@@ -225,24 +204,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   filterIcon: {
-    fontSize: 20,
+    fontSize: 24,
     color: '#00796B',
   },
   products: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   product: {
-    backgroundColor: '#014043',  // Updated product card background
+    backgroundColor: '#014043',
     borderRadius: 10,
     padding: 10,
     marginBottom: 20,
-    width: (width / 2) - 30, // Adjust card width to fit two cards per row with spacing
+    width: width - 40, 
+    overflow: 'hidden', 
   },
   productImage: {
     width: '100%',
-    height: 150,
+    height: undefined,
+    aspectRatio: 1,
     borderRadius: 10,
   },
   productName: {
@@ -259,18 +239,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#B2DFDB',
   },
-  productRating: {
-    flexDirection: 'row',
-    marginVertical: 10,
-  },
-  productStar: {
-    fontSize: 16,
-    color: '#FFD700',
-  },
   productButton: {
-    backgroundColor: '#00796B',  // Updated button color
+    backgroundColor: '#B3492D',
     paddingVertical: 10,
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: 'center',
   },
   productButtonText: {
@@ -281,33 +253,54 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',  // Dark background for modal
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#00595E',
     borderRadius: 10,
     padding: 20,
     width: '80%',
-    maxHeight: '50%',
+    alignItems: 'center',
   },
   modalItem: {
-    padding: 10,
+    paddingVertical: 10,
+    width: '100%',
+    alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#00796B',
   },
   modalItemText: {
-    fontSize: 16,
-    color: '#00796B',
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
   },
   closeButton: {
-    marginTop: 10,
+    marginTop: 20,
     paddingVertical: 10,
     backgroundColor: '#00796B',
     borderRadius: 5,
     alignItems: 'center',
+    width: '100%',
   },
   closeButtonText: {
     color: '#fff',
     fontWeight: 'bold',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#00595E',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#00595E',
+  },
+  errorText: {
+    color: '#fff',
+  },
 });
+
+export default Shop;

@@ -26,6 +26,7 @@ export default function RootLayout() {
           <Stack.Screen name="createExp/CreateExp" options={{title: "create experience", headerShown: false}} />
           <Stack.Screen name="addTips/addTips" options={{title: "create experience", headerShown: false}} />
           <Stack.Screen name="ConversationMessages/ConversationMessages" options={{ title: "ConversationMessages", headerShown: false }} />
+          <Stack.Screen name="ProductDetails/ProductDetails"  options={{ title: 'Product Details' , headerShown: false}} />
         </Stack>
       </ChatProvider>
 
