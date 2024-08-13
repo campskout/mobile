@@ -11,19 +11,20 @@ const { width, height } = Dimensions.get('window');
 const categories = ['Kayaking', 'Climbing', 'Fishing', 'Hiking', 'Hitchhiking'];
 
 
+
 interface User {
 
   id: string;
   name: string;
   email: string;
   role: string;
-  imagesProfile?: string[]; 
+  // imagesProfile: string; 
 }
 
 const Home = () => {
   const router = useRouter();
   const profileImage = require('../../assets/images/default-avatar.webp');
-  const [user, setUser] = useState<User>({ id: "", name: "", email: "", role: "", imagesProfile: [] });
+  const [user, setUser] = useState<User>({ id: "", name: "", email: "", role: ""});
   const [camps, setCamps] = useState<any[]>([]);
   const [filteredCamps, setFilteredCamps] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -32,6 +33,20 @@ const Home = () => {
   const [likedCamps, setLikedCamps] = useState<Set<number>>(new Set());
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
   const menuAnimation = useState(new Animated.Value(-width))[0]; 
+  const [imgPro,setImagePro]=useState<string>('')
+
+
+  const handleHeartPress = (campId: number) => {
+    setLikedCamps(prevLikedCamps => {
+      const newLikedCamps = new Set(prevLikedCamps);
+      if (newLikedCamps.has(campId)) {
+        newLikedCamps.delete(campId);
+      } else {
+        newLikedCamps.add(campId);
+      }
+      return newLikedCamps;
+    });
+  };
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
@@ -68,87 +83,75 @@ const Home = () => {
   useEffect(() => {
     const fetchUserAndCamps = async () => {
       try {
-        // Retrieve user data from AsyncStorage
-        const storedUser = await AsyncStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        } else {
-          // If no user data, fetch token and decode
-          const tokenData = await AsyncStorage.getItem('token');
-          if (tokenData) {
-            const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
-            const key = 'mySuperSecretPrivateKey';
+        const tokenData = await AsyncStorage.getItem('token');
+        // console.log("token:", tokenData);
 
-            try {
-              const decodedToken = JWT.decode(token, key);
-              if (decodedToken) {
-                const userData: User = {
-                  id: decodedToken.id || '',
-                  name: decodedToken.name || '',
-                  email: decodedToken.email || '',
-                  imagesProfile: decodedToken.imagesProfile,
-                  role: decodedToken.role || '',
-                };
+        if (tokenData) {
+          const token = tokenData.startsWith('Bearer ') ? tokenData.replace('Bearer ', '') : tokenData;
+          const key = 'mySuperSecretPrivateKey'; 
 
-                // Save user data to AsyncStorage
-                await AsyncStorage.setItem('user', JSON.stringify(userData));
-                setUser(userData);
-              } else {
-                console.error('Failed to decode token');
-              }
-            } catch (decodeError) {
-              console.error('Error decoding token:', decodeError);
+          try {
+            const decodedToken = JWT.decode(token, key);
+            
+            if (decodedToken) {
+              setUser({
+                id: decodedToken.id || '',
+                name: decodedToken.name || '',
+                email: decodedToken.email || '',
+                // imagesProfile: decodedToken.imagesProfile,
+                role: decodedToken.role || '',
+              });
+              // console.log(decodedToken.imagesProfile,'TOKEN');
+              getOneUser(user.id)
+            } else {
+              console.error('Failed to decode token');
             }
-          } else {
-            console.error('Token not found in AsyncStorage');
-            setError('Token not found');
+          } catch (decodeError) {
+            console.error('Error decoding token:', decodeError);
           }
-
+          // console.log(campsResponse.data.data)
 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.13:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.6:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
-          console.log(campsResponse.data.data)
           setFilteredCamps(campsResponse.data.data);
         } else {
           console.error('Token not found in AsyncStorage');
           setError('Token not found');
-
         }
-
-        // Fetch camps data
-        const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
-        setCamps(campsResponse.data.data);
-        setFilteredCamps(campsResponse.data.data);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-        setError('Failed to fetch data');
+      } catch (storageError) {
+        console.error('Failed to fetch token from AsyncStorage:', storageError);
+        setError('Failed to fetch token');
       } finally {
         setLoading(false);
       }
     };
 
+
+
     fetchUserAndCamps();
-  }, []);
+  }, []); // Empty dependency array to run only once
 
 
   // console.log('User:', user);
+  // console.log(response.data,'userr');
   // console.log('Camps:', camps);
 
-  const handleHeartPress = (campId: number) => {
-    console.log(`Heart pressed for campId: ${campId}`); 
-    setLikedCamps(prevLikedCamps => {
-      const newLikedCamps = new Set(prevLikedCamps);
-      if (newLikedCamps.has(campId)) {
-        newLikedCamps.delete(campId);
-        console.log(`Removed campId: ${campId} from likedCamps`); 
-      } else {
-        newLikedCamps.add(campId); // Add to liked camps
-        console.log(`Added campId: ${campId} to likedCamps`); 
-      }
-      return newLikedCamps;
-    });
+  const getOneUser = async (id:string) => {
+    // const id = user.id;
+    try {
+      const response = await axios.get(`http://192.168.10.6:5000/api/users/${id}`);
+      const oneUser = response.data;
+      console.log(oneUser.user.imagesProfile,'oneuser home');
+      
+      setImagePro(oneUser.user.imagesProfile); 
+    } catch (error) {
+      console.error('getOne home',error.message);
+    }
   };
+
+
+
 
   if (loading) {
     return <Text style={styles.loadingText}>Loading...</Text>;
@@ -157,6 +160,7 @@ const Home = () => {
   if (error) {
     return <Text style={styles.errorText}>Error: {error}</Text>;
   }
+  
 
   return (
     <View style={styles.container}>
@@ -177,7 +181,7 @@ const Home = () => {
         </View>
         <View style={styles.actionSection}>
           <TouchableOpacity onPress={() => router.replace('/profile/Profile')}>
-            <Image source={{ uri: user.imagesProfile?.[0] || 'https://via.placeholder.com/50' }} style={styles.profileImage} />
+            <Image source={{ uri: imgPro || 'https://via.placeholder.com/50' }} style={styles.profileImage} />
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.actionButton, styles.campingPostButton]} onPress={() => router.replace('creatCamp/CreateCamPost')}>
@@ -203,19 +207,18 @@ const Home = () => {
         <View style={styles.postList}>
           {filteredCamps.map((camp) => (
             <View style={styles.postContainer} key={camp.id}>
-           <Image source={{ uri: camp.images[0] }} style={styles.postImage} />
+              <Image source={{ uri: camp.images[0] }} style={styles.postImage} />
               <View style={styles.postOverlay}>
-              <TouchableOpacity
-  style={styles.heartButton}
-  onPress={() => handleHeartPress(camp.id)}
->
-  <MaterialCommunityIcons
-    name={likedCamps.has(camp.id) ? 'heart' : 'heart-outline'}
-    size={30}
-    color={likedCamps.has(camp.id) ? 'red' : 'white'}
-  />
-</TouchableOpacity>
-
+                <TouchableOpacity
+                  style={styles.heartButton}
+                  onPress={() => handleHeartPress(camp.id)}
+                >
+                  <MaterialCommunityIcons
+                    name={likedCamps.has(camp.id) ? 'heart' : 'heart-outline'}
+                    size={30}
+                    color={likedCamps.has(camp.id) ? 'red' : 'white'}
+                  />
+                </TouchableOpacity>
                 <View style={styles.textOverlay}>
                   <Text style={styles.postTitle}>{camp.title}</Text>
                   <Text style={styles.postLocation}>
@@ -226,7 +229,7 @@ const Home = () => {
                   </Text>
                   {camp.user && (
                     <View style={styles.hostInfo}>
-                      <Image source={{ uri: camp.user.imagesProfile[0] || profileImage }} style={styles.hostProfileImage} />
+                      <Image source={{ uri: imgPro ||  'https://via.placeholder.com/50' }} style={styles.hostProfileImage} />
                       <Text style={styles.hostName}>{camp.user.name}</Text>
                     </View>
                   )}
@@ -373,11 +376,8 @@ const styles = StyleSheet.create({
     right: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: 20,
-    padding: 10,
-    zIndex: 1,
+    padding: 5,
   },
-  
-  
   textOverlay: {
     marginBottom: 10,
   },

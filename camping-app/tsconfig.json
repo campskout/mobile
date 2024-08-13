@@ -14,7 +14,7 @@
     "baseUrl": "."
   },
   "include": [
-    "/*.ts",
+    "/.ts",
     "/.tsx",
     ".expo/types/**/.ts/jsx",
     "expo-env.d.ts",
@@ -23,6 +23,7 @@
     "app/index.tsx",
     "app/auth/SignUp.tsx",
     "app/auth/SignIn/SignIn.tsx",
+    ".expo/types//.ts",
     ".expo/types/*/.ts",
     ".expo/types/**/*.ts"
   ]
