@@ -109,6 +109,7 @@ const Home = () => {
           } catch (decodeError) {
             console.error('Error decoding token:', decodeError);
           }
+
           // console.log(campsResponse.data.data)
 
           // Fetch camps data
@@ -118,6 +119,7 @@ const Home = () => {
         } else {
           console.error('Token not found in AsyncStorage');
           setError('Token not found');
+
         }
       } catch (storageError) {
         console.error('Failed to fetch token from AsyncStorage:', storageError);

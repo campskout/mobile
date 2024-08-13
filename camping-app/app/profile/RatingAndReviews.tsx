@@ -18,34 +18,36 @@ const RatingAndReviews = () => {
   const [postsJoined, setPostsJoined] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-  // Fetch user data
-  const fetchUserData = async (userId: string) => {
-    try {
-      const response = await axios.get(`http://192.168.10.6:5000/api/users/${userId}`);
-      const user = response.data.user;
-      setUserData({
-        id: user.id,
-        name: user.name,
-        camps: response.data.posts,
-        joinCampingPosts: user.joinCampingPosts,
-      });
-      setUserId(user.id);
-      if (user.joinCampingPosts.length > 0) {
-        setPostId(user.joinCampingPosts[0].postId.toString());
-      }
 
-      const acceptedStatus = user.joinCampingPosts.some(
-        (post: any) => post.postId === Number(postId) && post.status === 'ACCEPTED'
-      );
-      setIsUserAccepted(acceptedStatus);
-      setPostsJoined(user.joinCampingPosts);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      setError('Failed to fetch user data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // // Fetch user data
+  // const fetchUserData = async (userId: string) => {
+  //   try {
+  //     const response = await axios.get(`http://192.168.10.13:5000/api/users/${userId}`);
+  //     const user = response.data.user;
+  //     setUserData({
+  //       id: user.id,
+  //       name: user.name,
+  //       camps: response.data.posts,
+  //       joinCampingPosts: user.joinCampingPosts,
+  //     });
+  //     setUserId(user.id);
+  //     if (user.joinCampingPosts.length > 0) {
+  //       setPostId(user.joinCampingPosts[0].postId.toString());
+  //     }
+
+
+  //     const acceptedStatus = user.joinCampingPosts.some(
+  //       (post: any) => post.postId === Number(postId) && post.status === 'ACCEPTED'
+  //     );
+  //     setIsUserAccepted(acceptedStatus);
+  //     setPostsJoined(user.joinCampingPosts);
+  //   } catch (error) {
+  //     console.error('Error fetching user data:', error);
+  //     setError('Failed to fetch user data');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // Handle update review
   const handleUpdateReview = async () => {
