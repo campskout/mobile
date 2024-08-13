@@ -19,7 +19,6 @@ import profileImage from "../../assets/images/default-avatar.webp";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import JWT from "expo-jwt";
 import { Ionicons, FontAwesome, AntDesign } from "@expo/vector-icons";
-=======
 // User Interface
 interface User {
   id: number;
@@ -135,9 +134,8 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-<
         const response = await axios.get(
-          `http://192.168.10.13:5000/api/users/${userId}`
+          `http://192.168.10.4:5000/api/users/${userId}`
         );
         setUser(response.data.user);
         setExperiences(response.data.user.experiences);
@@ -198,8 +196,8 @@ const UserProfile = () => {
       }
 
       const url = isLiked
-        ? `http://192.168.10.13:5000/api/like/${experienceId}/unlike`
-        : `http://192.168.10.13:5000/api/like/${experienceId}/like`;
+        ? `http://192.168.10.4:5000/api/like/${experienceId}/unlike`
+        : `http://192.168.10.4:5000/api/like/${experienceId}/like`;
 
       const method = isLiked ? "DELETE" : "POST";
 
@@ -236,7 +234,7 @@ const UserProfile = () => {
         return;
       }
 
-      await axios.post("http://192.168.10.13:5000/api/share/add", {
+      await axios.post("http://192.168.10.4:5000/api/share/add", {
         userId: sender.id,
         experienceId,
       });
@@ -262,7 +260,7 @@ const UserProfile = () => {
       const receiverId = userId;
 
       const response = await axios.post(
-        "http://192.168.10.13:5000/api/invitations/send",
+        "http://192.168.10.4:5000/api/invitations/send",
         {
           senderId,
           receiverId,
@@ -294,7 +292,7 @@ const UserProfile = () => {
 
     try {
       const response = await axios.post(
-        "http://192.168.10.13:5000/api/comment/add",
+        "http://192.168.10.4:5000/api/comment/add",
         {
           content: commentContent,
           experienceId: selectedExperienceId,
