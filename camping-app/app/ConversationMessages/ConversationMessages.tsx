@@ -12,6 +12,7 @@ const ConversationMessages = () => {
   const [user, setUser] = useState<any>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const { messages, sendMessage, setConversationId } = useChat();
+  const [receiverId, setReceiverId] = useState(null);
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -54,12 +55,14 @@ const ConversationMessages = () => {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   }, [messages]);
+console.log('user',user)
+console.log('messages',messages)
 
   const handleSend = () => {
     if (user) {
       const newMessage = {
         senderId: user.id,
-        receiverId: 2, 
+        receiverId:user.id , 
         content: message,
         conversationId: Number(conversationId),
       };
@@ -107,7 +110,7 @@ const ConversationMessages = () => {
     >
       {user && (
         <View style={styles.header}>
-          <Image source={{ uri: user.imagesProfile[0] }} style={styles.profileImage} />
+          <Image source={{ uri: user.imagesProfile }} style={styles.profileImage} />
           <Text style={styles.username}>{user.name}</Text>
         </View>
       )}
