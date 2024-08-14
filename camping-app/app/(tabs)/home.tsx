@@ -65,7 +65,7 @@ const Home = () => {
       useNativeDriver: true,
     }).start();
   };
-
+ 
   const handleLogout = async () => {
     await AsyncStorage.removeItem('token');
     router.replace('auth/SignIn'); 
@@ -108,12 +108,12 @@ const Home = () => {
             }
           } catch (decodeError) {
             console.error('Error decoding token:', decodeError);
-          }
+          } 
 
           // console.log(campsResponse.data.data)
-
+ 
           // Fetch camps data
-          const campsResponse = await axios.get('http://192.168.10.6:5000/api/camps/getAll');
+          const campsResponse = await axios.get('http://192.168.10.4:5000/api/camps/getAll');
           setCamps(campsResponse.data.data);
           setFilteredCamps(campsResponse.data.data);
         } else {
@@ -129,20 +129,20 @@ const Home = () => {
       }
     };
 
-
-
+  
+ 
     fetchUserAndCamps();
-  }, []); // Empty dependency array to run only once
-
+  }, []); 
+  
 
   // console.log('User:', user);
   // console.log(response.data,'userr');
   // console.log('Camps:', camps);
 
-  const getOneUser = async (id:string) => {
+  const getOneUser = async (id:string) => { 
     // const id = user.id;
     try {
-      const response = await axios.get(`http://192.168.10.6:5000/api/users/${id}`);
+      const response = await axios.get(`http://192.168.10.4:5000/api/users/${id}`);
       const oneUser = response.data;
       console.log(oneUser.user.imagesProfile,'oneuser home');
       
@@ -162,7 +162,7 @@ const Home = () => {
   if (error) {
     return <Text style={styles.errorText}>Error: {error}</Text>;
   }
-  
+   
 
   return (
     <View style={styles.container}>

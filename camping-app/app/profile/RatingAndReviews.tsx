@@ -52,7 +52,7 @@ const RatingAndReviews = () => {
   // Handle update review
   const handleUpdateReview = async () => {
     try {
-      const response = await fetch('http://192.168.10.6:5000/api/camps/updateReview', {
+      const response = await fetch('http://192.168.10.4:5000/api/camps/updateReview', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

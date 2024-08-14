@@ -50,7 +50,7 @@ const Notifications = () => {
   useEffect(() => {
     const fetchUserData = async (userId: string) => {
       try {
-        const response = await axios.get(`http://192.168.10.6:5000/api/users/${userId}`);
+        const response = await axios.get(`http://192.168.10.4:5000/api/users/${userId}`);
         console.log("User data fetched:", response.data);
         setUser({
           id: response.data.user.id,

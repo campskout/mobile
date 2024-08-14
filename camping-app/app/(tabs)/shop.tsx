@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Modal, Pressable, TextInput, Dimensions, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Pressable, TextInput, Dimensions, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { router } from 'expo-router';
@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 const { width } = Dimensions.get('window');
 
 const Shop = () => {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [dropdownVisible, setDropdownVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ const Shop = () => {
 
         if (Array.isArray(result.data)) {
           setProducts(result.data);
-          console.log(result.data)
+          console.log(result.data);
         } else {
           console.error('Expected an array but got:', result.data);
         }
@@ -40,16 +40,21 @@ const Shop = () => {
   };
 
   const handleFilterPress = () => {
-    setModalVisible(true);
+    setDropdownVisible(!dropdownVisible);
   };
 
   const handleCategorySelect = (category) => {
     console.log(`${category} selected`);
-    setModalVisible(false);
+    setDropdownVisible(false);
   };
 
   const handleMoreDetailsPress = (productId) => {
     router.push(`/ProductDetails/ProductDetails?id=${productId}`);
+  };
+
+  const handleSellProductPress = () => {
+    console.log('Sell Product icon pressed');
+    // Implement your sell product functionality here
   };
 
   if (loading) {
@@ -73,6 +78,15 @@ const Shop = () => {
       <View style={styles.header}>
         <Text style={styles.title}>MarketPlace</Text>
       </View>
+      {/* Interested to Sell Text with Add Icon */}
+      <View style={styles.sellContainer}>
+        <Text style={styles.sellText}>Interested To Sell Your Own Product !!</Text>
+        <TouchableOpacity onPress={handleSellProductPress}>
+          <View style={styles.addIconContainer}>
+            <Icon name="add" size={30} color="#fff" style={styles.addIcon} />
+          </View>
+        </TouchableOpacity>
+      </View>
       <View style={styles.search}>
         <TextInput
           style={styles.searchInput}
@@ -85,10 +99,25 @@ const Shop = () => {
           <Text style={styles.searchIcon}>🔍</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.filter} onPress={handleFilterPress}>
-        <Text style={styles.filterText}>Filter By Category</Text>
-        <Icon name="filter-list" size={24} color="#00796B" />
-      </TouchableOpacity>
+      <View style={styles.filterContainer}>
+        <TouchableOpacity style={styles.filter} onPress={handleFilterPress}>
+          <Text style={styles.filterText}>Filter By Category</Text>
+          <Icon name="filter-list" size={24} color="#00796B" />
+        </TouchableOpacity>
+        {dropdownVisible && (
+          <View style={styles.dropdownMenu}>
+            {categories.map(category => (
+              <Pressable 
+                key={category} 
+                style={styles.dropdownItem} 
+                onPress={() => handleCategorySelect(category)}
+              >
+                <Text style={styles.dropdownItemText}>{category}</Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+      </View>
       <View style={styles.products}>
         {products
           .filter(product => 
@@ -99,7 +128,6 @@ const Shop = () => {
               <Image
                 source={{ uri: product.imageUrl[0] }}
                 style={styles.productImage}
-                
               />
               <Text style={styles.productName}>{product.title || 'Untitled'}</Text>
               <Text style={styles.productPrice}>{product.price ? `${product.price} TND` : 'Price Unavailable'}</Text>
@@ -114,34 +142,6 @@ const Shop = () => {
           ))
         }
       </View>
-
-      {/* Dropdown Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {categories.map(category => (
-              <Pressable 
-                key={category} 
-                style={styles.modalItem} 
-                onPress={() => handleCategorySelect(category)}
-              >
-                <Text style={styles.modalItemText}>{category}</Text>
-              </Pressable>
-            ))}
-            <Pressable 
-              style={styles.closeButton} 
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 };
@@ -161,16 +161,15 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 0,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
-    flex: 1,
+    marginTop: 18
   },
   search: {
     flexDirection: 'row',
@@ -190,22 +189,40 @@ const styles = StyleSheet.create({
     color: '#00796B',
     marginLeft: 10,
   },
+  filterContainer: {
+    position: 'relative',
+    marginBottom: 20,
+  },
   filter: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 10,
-    marginBottom: 20,
   },
   filterText: {
     fontSize: 16,
     color: '#00796B',
     flex: 1,
   },
-  filterIcon: {
-    fontSize: 24,
-    color: '#00796B',
+  dropdownMenu: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    position: 'absolute',
+    top: 50, 
+    left: 0,
+    right: 0,
+    zIndex: 10, 
+  },
+  dropdownItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#00595E',
+  },
+  dropdownItemText: {
+    fontSize: 18,
+    color: '#00595E',
   },
   products: {
     flexDirection: 'column',
@@ -216,13 +233,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginBottom: 20,
-    width: width - 40, 
-    overflow: 'hidden', 
+    width: width - 40,
+    overflow: 'hidden',
   },
   productImage: {
-    width: '100%',
-    height: undefined,
-    aspectRatio: 1,
+    width: 300,
+    height: 200,
     borderRadius: 10,
   },
   productName: {
@@ -249,42 +265,29 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  modalContainer: {
+  sellContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#B3492D',
+    padding: 10,
+    borderRadius: 10,
+    marginVertical: 20,
+  },
+  sellText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18,
     flex: 1,
+  },
+  addIconContainer: {
+    backgroundColor: '#00796B',
+    borderRadius: 20,
+    padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalContent: {
-    backgroundColor: '#00595E',
-    borderRadius: 10,
-    padding: 20,
-    width: '80%',
-    alignItems: 'center',
-  },
-  modalItem: {
-    paddingVertical: 10,
-    width: '100%',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#00796B',
-  },
-  modalItemText: {
-    fontSize: 18,
+  addIcon: {
     color: '#fff',
-    fontWeight: 'bold',
-  },
-  closeButton: {
-    marginTop: 20,
-    paddingVertical: 10,
-    backgroundColor: '#00796B',
-    borderRadius: 5,
-    alignItems: 'center',
-    width: '100%',
-  },
-  closeButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
   loadingContainer: {
     flex: 1,

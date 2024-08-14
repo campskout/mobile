@@ -34,7 +34,7 @@ const ProductDetails = () => {
   }, [id]);
 
   const handleSendMessage = () => {
-    // Logic to handle sending the message
+
     console.log('Message sent:', message);
     setMessage('');
   };
