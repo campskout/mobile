@@ -110,7 +110,7 @@ const EditProfile = () => {
     }
     
     try {
-      const response = await axios.put(`http://192.168.10.6:5000/api/user/update/${user.id}`, formData, {
+      const response = await axios.put(`http://192.168.10.4:5000/api/user/update/${user.id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -182,7 +182,7 @@ const EditProfile = () => {
   const getOneUser = async (id:string) => {
     // const id = user.id;
     try {
-      const response = await axios.get(`http://192.168.10.6:5000/api/users/${id}`);
+      const response = await axios.get(`http://192.168.10.4:5000/api/users/${id}`);
       const oneUser = response.data;
       console.log(oneUser,'oneuser home');
       
